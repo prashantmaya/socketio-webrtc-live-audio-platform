@@ -12,5 +12,19 @@ class TokenService {
 
     return { accessToken, refreshToken };
   }
+  async storeRefreshToken(token, userId) {
+    try {
+      await refreshModel.create({
+        token,
+        userId,
+      });
+    } catch (err) {
+      console.log(err.message);
+    }
+  }
+
+  async verifyAccessToken(token) {
+    return jwt.verify(token, accessTokenSecret);
+  }
 }
 module.exports = new TokenService();

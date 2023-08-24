@@ -20,7 +20,6 @@ const StepOtp = ({ onNext }) => {
         phone_number: auth.phone,
         hash: auth.hash,
       });
-      console.log("Data: ", data);
       dispatch(setAuth({ user: data }));
       // onNext();
     } catch (error) {

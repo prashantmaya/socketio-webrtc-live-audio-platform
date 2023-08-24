@@ -88,6 +88,11 @@ class AuthController {
       httpOnly: true,
     });
 
+    res.cookie("accessToken", accessToken, {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true,
+    });
+
     //Serializing data.
 
     const userDTO = new UserDTO(user);

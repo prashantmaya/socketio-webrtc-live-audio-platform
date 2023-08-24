@@ -36,7 +36,7 @@ function App(location) {
         render={({ location }) => {
           return !isAuth ? (
             <Redirect to={{ pathname: "/", state: { from: location } }} />
-          ) : isAuth && !user.isActivated ? (
+          ) : isAuth && !user.activated ? (
             children
           ) : (
             <Redirect to={{ pathname: "/rooms", state: { from: location } }} />
@@ -55,7 +55,7 @@ function App(location) {
         render={({ location }) => {
           return !isAuth ? (
             <Redirect to={{ pathname: "/", state: { from: location } }} />
-          ) : isAuth && !user.isActivated ? (
+          ) : isAuth && !user.activated ? (
             <Redirect to={{ pathname: "/activate" }} />
           ) : (
             children //[Rooms Page]

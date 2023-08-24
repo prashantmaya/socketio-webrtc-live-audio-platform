@@ -14,6 +14,7 @@ const Phone = ({ onTypeChange, onNext }) => {
 
   async function submit() {
     const { data } = await sendOtp({ phone_number: phoneNumber });
+    console.log("Data: ", data);
     dispatch(setOtp({ phone: data.phone_number, hash: data.hash }));
     onNext();
   }

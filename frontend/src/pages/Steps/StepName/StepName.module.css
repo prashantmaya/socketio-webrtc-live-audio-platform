@@ -1,0 +1,7 @@
+.ctaButton {
+  composes: ctaButton from "../../../App.module.css";
+}
+
+.buttomParagraph {
+  composes: buttomParagraph from "../../../App.module.css";
+}
