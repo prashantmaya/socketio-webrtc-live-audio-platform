@@ -1,17 +1,11 @@
 import React from "react";
 import styles from "./Home.module.css";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import Card from "../../components/shared/Card/Card";
 import Button from "../../components/shared/Button/Button";
 import globalStyles from "../../App.module.css";
 
 const Home = () => {
-  const signInLinkStyle = {
-    color: "#0077ff",
-    fontWeight: "bold",
-    textDecoration: "none",
-    marginLeft: "10px",
-  };
   const history = useHistory();
   function startRegister() {
     history.push("/authenticate");

@@ -10,15 +10,16 @@ import { setAuth } from "../../../store/authSlice";
 
 const StepOtp = ({ onNext }) => {
   const [OTP, setOTP] = useState("");
-  const auth = useSelector((state) => state.authSlice.otp);
+  const { phone, hash } = useSelector((state) => state.authSlice.otp);
   const dispatch = useDispatch();
 
   async function submit() {
     try {
+      if (!phone || !hash || !OTP) return;
       const { data } = await verifyOtp({
         otp: OTP,
-        phone_number: auth.phone,
-        hash: auth.hash,
+        phone_number: phone,
+        hash: hash,
       });
       dispatch(setAuth({ user: data }));
       // onNext();

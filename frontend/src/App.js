@@ -6,10 +6,14 @@ import Navigation from "./components/shared/Navigation/Navigation";
 import Authenticate from "./pages/Authenticate/Authenticate";
 import Activate from "./pages/Activate/Activate";
 import Rooms from "./pages/Rooms/Rooms";
+import Loader from "./components/shared/Loader/Loader";
 
 import { useSelector } from "react-redux";
+import { useLoadingWithRefresh } from "./hooks/useLoadingWithRefresh";
+import Room from "./pages/Room/Room";
 
 function App(location) {
+  const { loading } = useLoadingWithRefresh();
   const GuestRoute = ({ children, ...rest }) => {
     const { isAuth } = useSelector((state) => state.authSlice);
 
@@ -48,7 +52,6 @@ function App(location) {
 
   const ProtectedRoute = ({ children, ...rest }) => {
     const { user, isAuth } = useSelector((state) => state.authSlice);
-
     return (
       <Route
         {...rest}
@@ -65,7 +68,9 @@ function App(location) {
     );
   };
 
-  return (
+  return loading ? (
+    <Loader message="Loading, Please wait..." />
+  ) : (
     <BrowserRouter>
       <Navigation />
       <Switch>
@@ -81,6 +86,9 @@ function App(location) {
         </SemiProtectedRoute>
         <ProtectedRoute path="/rooms">
           <Rooms />
+        </ProtectedRoute>
+        <ProtectedRoute path="/room/:id">
+          <Room />
         </ProtectedRoute>
       </Switch>
     </BrowserRouter>

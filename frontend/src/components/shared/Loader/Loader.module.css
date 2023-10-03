@@ -1,0 +1,14 @@
+.message {
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.cardWrapper {
+  composes: cardWrapper from "../../../App.module.css";
+}
+
+.spinner {
+  height: 54px;
+  width: 54px;
+  margin-bottom: 10px;
+}

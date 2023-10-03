@@ -1,0 +1,130 @@
+WebSocket ->
+We have multiple client and one server. Every Client Will connect to the server.
+The Server Will send the Event/Actions to other clients.
+
+WebRTC ->
+There is no server, So clients connect with each others. Peer to peer connections.
+
+How it works ->
+Client 1 
+const peerConnection = new RTCPeerConnection(); //function call to establish connection between 2 clients.
+
+const dataChannel = peerConnection.createDataChannel('OnePiece'); //Information is passed through this channel.
+
+dataChannel.onopen = () => console.log('Sender Channel Was Opened');
+dataChannel.onmessage = (message) => console.log('New message: ',message);
+
+peerConnection.onicecandidate = () => console.log('Ice Candidate',JSON.stringify(peerConnection.localDescription));
+
+const offer = peerConnection.createOffer(); //When one client is willing to establish connection with other client.
+const offer =  {"type":"offer","sdp":"v=0\r\no=- 1568615424553659536 3 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 1\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=candidate:1910925301 1 udp 2113937151 77728665-e5f8-454e-b20e-e37ef424010d.local 58380 typ host generation 0 network-cost 999\r\na=candidate:1329629881 1 udp 2113939711 f9c0ff98-b29f-440f-9812-653e5f50fce8.local 49285 typ host generation 0 network-cost 999\r\na=ice-ufrag:uShb\r\na=ice-pwd:4hicmGU6fdJt72O2RDm967L+\r\na=ice-options:trickle\r\na=fingerprint:sha-256 9E:36:6E:1C:E5:AB:92:2A:0F:B9:7C:82:D7:5F:70:AB:C3:57:86:28:DB:29:1B:1C:CE:C1:6D:37:0E:F6:14:77\r\na=setup:actpass\r\na=mid:1\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"}
+await peerConnection.setLocalDescription(offer);
+
+
+Client 2
+
+const peerConnection = new RTCPeerConnection();
+const offer = {offerInformation};
+peerConnection.onicecandidate = () => console.log('Ice Candidate',JSON.stringify(peerConnection.localDescription));
+await peerConnection.setRemoteDescription(offer);
+let dataChannel; //This is not the main data channel. 
+peerConnection.onDataChannel = (e) =>{
+    dataChannel = e.channel;
+    dataChannel.onopen = () => console.log("Receiver Channel Was Opened.");
+    dataChannel.onmessage = (message) => console.log('Message Received:', message.data);
+}
+
+const answer = peerConnection.createAnswer();
+await peerConnection.setLocalDescription(answer);
+
+
+Channel 1
+
+const answer = {answerInformation};
+const answer = {"type":"answer","sdp":"v=0\r\no=- 1068851787760657989 3 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 1\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 59883 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 192.168.29.15\r\na=candidate:1773771305 1 udp 2122194687 192.168.29.15 59883 typ host generation 0 network-id 1 network-cost 10\r\na=candidate:2703429070 1 udp 2122262783 2405:201:5c08:fe8a:145:6881:dc0d:cd06 51957 typ host generation 0 network-id 2 network-cost 10\r\na=ice-ufrag:W5/p\r\na=ice-pwd:r34Xyc9aiP2b0fcEVMeFse1I\r\na=ice-options:trickle\r\na=fingerprint:sha-256 C2:7E:97:14:E2:A0:4D:7D:B1:38:54:04:2A:53:99:61:63:EB:F0:C5:D3:AC:CB:FE:85:D0:D8:2B:E6:FB:11:33\r\na=setup:active\r\na=mid:1\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"}
+await peerConnection.setRemoteDescription(answer)
+
+
+
+___
+
+// Client 1
+const peerConnection = new RTCPeerConnection();
+const dataChannel = peerConnection.createDataChannel('OnePiece', { reliable: true });
+
+dataChannel.onopen = () => console.log('Sender Channel Was Opened');
+dataChannel.onmessage = (event) => console.log('New message: ', event.data);
+
+peerConnection.onicecandidate = (event) => {
+  if (event.candidate) {
+    // Send the local ICE candidate to Client 2
+    sendCandidateToClient2(event.candidate);
+  }
+};
+
+async function createOffer() {
+  try {
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+
+    // Send the offer to Client 2
+    sendOfferToClient2(offer);
+  } catch (error) {
+    console.error('Error creating offer:', error);
+  }
+}
+
+// Call createOffer when ready to start the connection
+createOffer();
+
+
+// Client 2
+const peerConnection = new RTCPeerConnection();
+
+peerConnection.ondatachannel = (event) => {
+  const dataChannel = event.channel;
+  dataChannel.onopen = () => console.log("Receiver Channel Was Opened.");
+  dataChannel.onmessage = (event) => console.log('Message Received:', event.data);
+};
+
+peerConnection.onicecandidate = (event) => {
+  if (event.candidate) {
+    // Send the local ICE candidate to Client 1
+    sendCandidateToClient1(event.candidate);
+  }
+};
+
+async function handleOffer(offer) {
+  try {
+    // Set the received offer as the remote description
+    await peerConnection.setRemoteDescription(offer);
+
+    // Create an answer and set it as the local description
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    // Send the answer to Client 1
+    sendAnswerToClient1(answer);
+  } catch (error) {
+    console.error('Error handling offer:', error);
+  }
+}
+
+// Handle the received offer (from signaling or another method)
+const receivedOffer = // Get the offer from signaling or Client 1
+handleOffer(receivedOffer);
+
+ICECandidates - ICE stands for Interactive Connectivity Establishment. ICECandidates store pieces of information for the device in order to make a 
+peer-to-peer connection. Information about device networks and connection ports.
+2 main types -
+1. Local Candidate - 
+2. Remote Candidate
+
+What is Docker -
+Docker is container management system.
+Docker Provides you a Virtual Machine where you can execute your entire project. which will be totally isolated from your device.
+
+In order to work with docker. we first create an image of the entire project with all the dependencies and requirements.
+then we make containers using that image to run the code.
+The container has all the source code to run the code.
+

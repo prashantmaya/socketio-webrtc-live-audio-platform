@@ -19,12 +19,11 @@ class AuthController {
       const data = `${phone_number}.${otp}.${expires}`;
       const hashedOtp = HashService.hashOtp(data);
 
-      // await OtpService.sendBySMS(phone_number, otp);
+      await OtpService.sendBySMS(phone_number, otp);
 
       return res.status(200).json({
         hash: `${hashedOtp}.${expires}`,
         phone_number,
-        otp: otp,
       });
     } catch (error) {
       console.error("OTP sending failed:", error);
@@ -83,6 +82,7 @@ class AuthController {
       activated: false,
     }));
 
+    await TokenService.storeRefreshToken(refreshToken, user._id);
     res.cookie("refreshToken", refreshToken, {
       maxAge: 1000 * 60 * 60 * 24 * 30,
       httpOnly: true,
@@ -98,6 +98,71 @@ class AuthController {
     const userDTO = new UserDTO(user);
 
     res.json({ accessToken, user: userDTO });
+  }
+
+  async refresh(req, res) {
+    const { refreshToken: refreshTokenFromCookie } = req.cookies;
+    // check if token is valid
+    let userData;
+    try {
+      userData = await TokenService.verifyRefreshToken(refreshTokenFromCookie);
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid Token" });
+    }
+    // Check if token is in db
+    try {
+      const token = await TokenService.findRefreshToken(
+        userData._id,
+        refreshTokenFromCookie
+      );
+      if (!token) {
+        return res.status(401).json({ message: "Invalid token" });
+      }
+    } catch (err) {
+      return res.status(500).json({ message: "Internal error" });
+    }
+    // check if valid user
+    const user = await UserService.findUser({ _id: userData._id });
+    if (!user) {
+      return res.status(404).json({ message: "No user" });
+    }
+    // Generate new tokens
+    const { refreshToken, accessToken } = TokenService.generateTokens({
+      _id: userData._id,
+    });
+
+    // Update refresh token
+    try {
+      await TokenService.updateRefreshToken(userData._id, refreshToken);
+    } catch (err) {
+      return res.status(500).json({ message: "Internal error" });
+    }
+    // put in cookie
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true,
+    });
+
+    res.cookie("accessToken", accessToken, {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true,
+    });
+    // response
+    const userDto = new UserDTO(user);
+    res.json({ user: userDto, auth: true });
+  }
+
+  async logout(req, res) {
+    try {
+      const { refreshToken } = req.cookies;
+      await TokenService.removeToken(refreshToken); //remove token from DB.
+
+      res.clearCookie("refreshToken");
+      res.clearCookie("accessToken");
+      return res.json({ user: null, auth: false });
+    } catch (error) {
+      return res.status(500).json({ message: "Internal Error" });
+    }
   }
 }
 

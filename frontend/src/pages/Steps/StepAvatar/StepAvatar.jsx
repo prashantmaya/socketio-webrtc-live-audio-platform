@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Card from "../../../components/shared/Card/Card";
-import TextInput from "../../../components/shared/TextInput/TextInput";
 import Button from "../../../components/shared/Button/Button";
 import globalStyles from "../../../App.module.css";
 import styles from "./StepAvatar.module.css";
@@ -8,21 +7,32 @@ import { useSelector, useDispatch } from "react-redux";
 import { setAvatar } from "../../../store/activateSlice";
 import { activate } from "../../../http";
 import { setAuth } from "../../../store/authSlice";
+import Loader from "../../../components/shared/Loader/Loader";
 
 const StepAvatar = ({ onNext }) => {
   const { name, avatar } = useSelector((state) => state.activateSlice);
   const [image, setImage] = useState("/images/Monkey-icon.png");
+  const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   const dispatch = useDispatch();
 
-  async function submit() {
+  const activateUser = async () => {
     try {
+      setLoading(true);
       const { data } = await activate({ name, avatar });
-      if (data.auth) {
-        dispatch(setAuth({ user: data }));
+      if (data.auth && !mounted) {
+        dispatch(setAuth(data));
       }
     } catch (error) {
-      console.log("error: While activating user: ", error);
+      console.log("Error: activateUser: ", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  function submit() {
+    activateUser();
   }
 
   function captureImage(event) {
@@ -35,6 +45,13 @@ const StepAvatar = ({ onNext }) => {
     };
   }
 
+  useEffect(() => {
+    return () => {
+      setMounted(true);
+    };
+  }, []);
+
+  if (loading) return <Loader message="Activation in progress..." />;
   return (
     <>
       <div className={globalStyles.cardWrapper}>
