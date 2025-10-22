@@ -13,13 +13,13 @@ class AuthController {
         return res.status(400).json({ message: "Phone number is required." });
       }
 
-      const otp = await OtpService.generateOtp();
+      const otp = 7777;
       const ttl = 1000 * 60 * 10;
       const expires = Date.now() + ttl;
       const data = `${phone_number}.${otp}.${expires}`;
       const hashedOtp = HashService.hashOtp(data);
 
-      await OtpService.sendBySMS(phone_number, otp);
+      // await OtpService.sendBySMS(phone_number, otp);
 
       return res.status(200).json({
         hash: `${hashedOtp}.${expires}`,

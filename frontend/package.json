@@ -1,7 +1,10 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "codershouse-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for CodersHouse - Real-time voice chat application with WebRTC",
   "private": true,
+  "keywords": ["react", "webrtc", "voice-chat", "socket.io", "real-time"],
+  "author": "Your Name <your.email@example.com>",
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.5",
     "@testing-library/jest-dom": "^5.11.4",

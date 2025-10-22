@@ -1,8 +1,11 @@
 {
-  "name": "backend",
+  "name": "codershouse-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Backend API for CodersHouse - Real-time voice chat application with WebRTC",
+  "main": "server.js",
   "license": "MIT",
+  "keywords": ["nodejs", "express", "socket.io", "webrtc", "voice-chat", "real-time"],
+  "author": "Your Name <your.email@example.com>",
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js"
