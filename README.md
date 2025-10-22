@@ -113,9 +113,9 @@ MONGODB_URI=mongodb://localhost:27017/codershouse
 JWT_SECRET=your_jwt_secret
 JWT_REFRESH_SECRET=your_refresh_secret
 BASE_URL=http://localhost:5500
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_token
-TWILIO_SERVICE_SID=your_twilio_service_sid
+TWILIO_ACCOUNT_SID=your_account_sid_here
+TWILIO_AUTH_TOKEN=your_auth_token_here
+TWILIO_SERVICE_SID=your_service_sid_here
 ```
 
 ### Frontend (.env)
